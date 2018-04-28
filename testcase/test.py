@@ -1,6 +1,6 @@
 from base.reqeusts_headers import *
 from model.get_json_model import *
-import config
+from base import config
 
 
 def post_knowledge ():
