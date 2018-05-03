@@ -1,7 +1,5 @@
 # coding:utf8
-from util.read_excel import *
-import random
-import json
+from common.read_excel import *
 import time
 
 

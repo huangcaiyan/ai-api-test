@@ -2,9 +2,13 @@
   <dictionary name="huangcaiyan">
     <words>
       <w>chatbot</w>
+      <w>huangcaiyan</w>
       <w>ncols</w>
       <w>nrows</w>
+      <w>sscp</w>
       <w>testdata</w>
+      <w>testuser</w>
+      <w>xlsx</w>
     </words>
   </dictionary>
 </component>

@@ -2,7 +2,6 @@
 
 import requests
 import json
-import random
 from base import config
 
 # url = 'http://10.75.2.180:9100/robot'

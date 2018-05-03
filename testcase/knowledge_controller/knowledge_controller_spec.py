@@ -1,6 +1,4 @@
-import requests
 import unittest
-from base import config
 from .knowledge_controller import *
 
 
@@ -13,7 +11,7 @@ class KnowledgeControllerSpec (unittest.TestCase):
         pass
 
     def test_post_knowledge ( self):
-        url = config.base_url +'/knowledge/'
+        url = config.base_url + '/knowledge/'
         model_file_name = 'models'
         model_sheet = 'PostKnowledgeModel'
         testdata_file_name = 'testdata'

@@ -1,6 +1,6 @@
 import requests
 import json
-from base.reqeusts_headers import *
+from common.reqeusts_headers import *
 from model.get_json_model import *
 from base import config
 
