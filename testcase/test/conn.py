@@ -1,49 +1,73 @@
 import random
 
 import pymysql
+import json
+import requests
 
 
-class SQLHandle(object):
-    def __init__ ( self ):
-        self.url = 'http://10.75.2.121:9200/api/qa'
-        # 连接MySQL数据库
-        self.connection = pymysql.connect (host='10.75.2.178' , port=3306 , user='root' , password='SunLand2@' ,
-                                           db='sscp_test' ,
-                                           charset='utf8mb4' , cursorclass=pymysql.cursors.DictCursor)
-        # 通过cursor创建游标
-        self.cursor = self.connection.cursor ()
+def conn ( db_name , search_sql ):
+    # 连接MySQL数据库
 
-    # 获取一个随机问答
-    def select_all_questions ( self ):
+    connection = pymysql.connect (host='10.75.2.178' , port=3306 , user='root' , password='SunLand2@' ,
+                                  db=db_name ,
+                                  charset='utf8mb4' , cursorclass=pymysql.cursors.DictCursor)
+    # 通过cursor创建游标
+    cursor = connection.cursor ()
+    cursor.execute (sql)
+    result = cursor.fetchall ()
 
-        # 执行数据查询
-        sql = "select question from ai_question"
-        self.cursor.execute (sql)
-        qa_array = []
-        # 查询全部的数据
-        result = self.cursor.fetchall ()
-        for data in result:
-            for value in data.values ():
-                qa_array.append (value)
-        # 关闭数据连接
-        self.connection.close ()
-        ran1 = qa_array[random.randint (0 , len (qa_array))]
-        print ("随机问答：" , ran1)
+    search_results = []
+    for r in result:
+        for result_value in r.values ():
+            search_results.append (result_value)
+    connection.close ()
+    return search_results
 
-    def test ( self ):
-        # 执行数据查询
-        # sql = "select question, answer from ai_question as a inner join ai_answer as b on a.question_id = b.question_id   "
-        sql = "select  question from ai_question as a left join ai_answer as b on a.question_id = b.question_id  where answer = '%s'" % (
-            test2_qa.answer)
-        print ('sql=' , sql)
-        cursor.execute (sql)
-        all_values = cursor.fetchall ()
-        print ('all_values=' , all_values)
 
-        # 查询数据库单条数据
-        result = cursor.fetchone ()
-        print ('result=' , result)
-        for value in result.values ():
-            print ('数据库查询问答结果： ' + value)
+def QA_test ( url , db_name , robot_id , search_q_sql ):
+    questions = conn (db_name , search_q_sql)
+    headers = {'Content-Type': 'application/json' , 'Accept': 'application/json'}
+    Q_list = questions
+    A_list = []
+    R_list = []
+    QAR_list = []
+    for Q in questions:
+        s = json.dumps ({
+            "question": Q ,
+            "aiRobotId": robot_id ,
+        })
+        qa_question_req = requests.post (url , data=s , headers=headers)
+        qa_question_text = json.loads (qa_question_req.text)
+        try:
+            qa_dict = {}
+            for qa_question_data in qa_question_text['data']:
+                A = qa_question_data['answer']
+                search_equal_a_sql = "select  question from ai_question as a left join ai_answer as b on a.question_id = b.question_id  where answer = '%s'" % (
+                    A)
+                equal_a_question = conn (db_name , search_equal_a_sql)
+                qa_dict['question'] = Q
+                qa_dict['answer'] = A
+                if Q in equal_a_question:
+                    qa_dict['result'] = '匹配'
+                    result = '匹配'
+                else:
+                    qa_dict['result'] = '不匹配'
+                    result = '不匹配'
+                A_list.append (A)
+                R_list.append (result)
+                QAR_list.append (qa_dict)
+        except TypeError as e:
+            print ('get_robot_answers =' , str (e))
+    print ('Q_list=' , Q_list)
+    print ('A_list=' , A_list)
+    print ('R_list=' , R_list)
+    print ('QAR_list=' , QAR_list)
+    return Q_list , A_list , R_list , QAR_list
+
+
 if __name__ == '__main__':
-
+    db_name = 'sscp_test'
+    sql = "select question from ai_question"
+    a_url = 'http://10.75.2.121:9200/api/qa'
+    robot_id = 175
+    QA_test (a_url , db_name , robot_id , sql)

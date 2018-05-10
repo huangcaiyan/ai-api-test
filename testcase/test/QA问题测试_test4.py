@@ -24,8 +24,6 @@ def qustion():
     result = cursor.fetchall()
     for data in result:
         for value in data.values():
-            # print(data)
-            # print(value)
             qa_array.append(value)
 
     # 关闭数据连接

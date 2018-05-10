@@ -30,7 +30,7 @@ def get_json_model ( model_file_name , model_sheet , testdata_file_name , testda
             else:
                 payload_item[model_names[k]] = testdata_values[j][k]
         payloads.append (payload_item)
-    # print ('payloads=' , payloads,len(payloads))
+    print ('payloads=' , payloads,len(payloads))
     return payloads
 
 
