@@ -1,42 +1,24 @@
-# coding:utf8
-
 import requests
 import json
 import random
-import pymysql.cursors
+from .conn import conn
+from base.reqeusts_headers import req_headers
 
 url = 'http://10.75.2.121:9200/api/qa'
 
 
 def qustion ():
-    # 连接MySQL数据库
-    connection = pymysql.connect (host='10.75.2.178' , port=3306 , user='root' , password='SunLand2@' , db='sscp_test' ,
-                                  charset='utf8mb4' , cursorclass=pymysql.cursors.DictCursor)
-    # 通过cursor创建游标
-    cursor = connection.cursor ()
-
     # 执行数据查询
     sql = "select question from ai_question"
+    qa_array = conn (sql)
 
-    cursor.execute (sql)
+    def get_question():
+        for ran in qa_array:
+            s = json.dumps ({
+                "question": ran ,
+                "aiRobotId": 175 ,
+            })
 
-    global qa_array
-    qa_array = []
-    # 查询全部的数据
-    result = cursor.fetchall ()
-    for data in result:
-        for value in data.values ():
-            qa_array.append (value)
-
-    # 关闭数据连接
-    connection.close ()
-
-    for ran in qa_array:
-        ran
-    print ('ran=' , ran)
-
-    # ran1 = qa_array[random.randint (0 , len (qa_array))]
-    # print ("随机问答：" + ran1)
 
     # QA问题测试
     def qa_question ():
@@ -44,7 +26,7 @@ def qustion ():
         headers = {'Content-Type': 'application/json' , 'Accept': 'application/json'}
         global ran
         for ran in qa_array:
-            print('ran=',ran)
+            print ('ran=' , ran)
             s = json.dumps ({
                 "question": ran ,
                 "aiRobotId": 175 ,
@@ -56,10 +38,10 @@ def qustion ():
                     global answer
                     answer = line['answer']
                     print ("机器人回答：" + line['answer'])
-                    print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++\n')
+                    print ('+++++++++++++++++++++++++++++++++++++++++++++++++++++++\n')
             except TypeError as e:
                 answer = 0
-                print('机器人回答：抱歉，机器人回答不了您的问题。。。')
+                print ('机器人回答：抱歉，机器人回答不了您的问题。。。')
                 print ('----------------------------------------------------------\n')
 
     qa_question ()
@@ -94,7 +76,6 @@ def qustion ():
         for value in data.values ():
             print (data['question'])
             alist.append (data['question'])
-
 
     if ran in alist:
         print ('匹配成功')

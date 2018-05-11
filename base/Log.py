@@ -1,27 +1,27 @@
 import os
-from base import read_config
+import readConfig as readConfig
 import logging
 from datetime import datetime
 import threading
 
-localReadConfig = read_config.ReadConfig()
+localReadConfig = readConfig.ReadConfig()
 
 
 class Log:
     def __init__(self):
-        global log_path, result_path, pro_dir
-        pro_dir = read_config.pro_dir
-        result_path = os.path.join(pro_dir, "result")
-        if not os.path.exists(result_path):
-            os.mkdir(result_path)
-        log_path = os.path.join(result_path, str(datetime.now().strftime("%Y%m%d%H%M%S")))
-        if not os.path.exists(log_path):
-            os.mkdir(log_path)
+        global logPath, resultPath, proDir
+        proDir = readConfig.proDir
+        resultPath = os.path.join(proDir, "result")
+        if not os.path.exists(resultPath):
+            os.mkdir(resultPath)
+        logPath = os.path.join(resultPath, str(datetime.now().strftime("%Y%m%d%H%M%S")))
+        if not os.path.exists(logPath):
+            os.mkdir(logPath)
         self.logger = logging.getLogger()
         self.logger.setLevel(logging.INFO)
 
         # defined handler
-        handler = logging.FileHandler(os.path.join(log_path, "output.log"))
+        handler = logging.FileHandler(os.path.join(logPath, "output.log"))
         # defined formatter
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
@@ -63,7 +63,7 @@ class Log:
         get report file path
         :return:
         """
-        report_path = os.path.join(log_path, "report.html")
+        report_path = os.path.join(logPath, "report.html")
         return report_path
 
     def get_result_path(self):
@@ -71,7 +71,7 @@ class Log:
         get test result path
         :return:
         """
-        return log_path
+        return logPath
 
     def write_result(self, result):
         """
@@ -79,7 +79,7 @@ class Log:
         :param result:
         :return:
         """
-        result_path = os.path.join(log_path, "report.txt")
+        result_path = os.path.join(logPath, "report.txt")
         fb = open(result_path, "wb")
         try:
             fb.write(result)

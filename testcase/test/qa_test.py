@@ -1,34 +1,54 @@
 import requests
 import json
-import random
-import pymysql.cursors
-from .conn import SQLHandle
+from common.mysql_util import MysqlUtil
+from base.reqeusts_headers import req_headers
+from base.config import base_url
+
+mysql_util = MysqlUtil ()
 
 
-class QATest:
-    def __init__(self):
-        self.sql = SQLHandle()
+def get_all_question ():
+    fetchall_sql = "select question from ai_question"
+    all_question = mysql_util.fetchall (fetchall_sql)
+    return all_question
 
-    # QA问题测试
-    def qa_question ( self ):
-        global answer
-        name = random.randrange (100)
-        headers = {'Content-Type': 'application/json' , 'Accept': 'application/json'}
+
+def get_robot_answer ():
+    question_list = get_all_question ()
+    sql_pre = "select  question from ai_question as a left join ai_answer as b on a.question_id = b.question_id  where answer = '%s'"
+    q_list = ['开学典礼什么时候']
+    a_list = []
+    find_q_list = []
+    r_list = []
+    write_list = []
+    for q in question_list:
         s = json.dumps ({
-            "question": self.ran1 ,
+            "question": q ,
             "aiRobotId": 175 ,
         })
-        qa_question_req = requests.post (self.url , data=s , headers=headers)
-        qa_question_num = json.loads (qa_question_req.text)
-        print ('qa_question_num=' , qa_question_num)
-        if qa_question_num['data'] == 'no available answer!':
-            answer = '抱歉，机器人无法回答您的问题！请换个问法，谢谢！'
+        qa_question_req = requests.post (base_url , data=s , headers=req_headers)
+        qa_question_data = json.loads (qa_question_req.text)['data']
+        if qa_question_data == 'no available answer!':
+            answer = '没有可用的答案'
         else:
-            for line in qa_question_num['data']:
+            write_data = []
+            for line in qa_question_data:
                 answer = line['answer']
-        print ('机器人回答：' , answer)
+                # print ('机器人回答：' , answer)
+                sql = sql_pre % (answer)
+                find_q = mysql_util.fetchall (sql)
+                find_q_one = mysql_util.fetchone (sql)
+                if q in find_q:
+                    result = 1
+                else:
+                    result = 0
+                find_q_list.append (find_q_one)
+                r_list.append (result)
+        a_list.append (answer)
+        write_list.append (q_list , find_q_list , a_list , r_list)
+    return write_list
 
 
 if __name__ == '__main__':
-    qatest = QATest ()
-    qatest.qa_question ()
+    data = get_robot_answer ()
+    print ('data=' , data)

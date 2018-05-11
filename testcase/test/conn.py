@@ -5,15 +5,15 @@ import json
 import requests
 
 
-def conn ( db_name , search_sql ):
+def conn ( search_sql ):
     # 连接MySQL数据库
 
     connection = pymysql.connect (host='10.75.2.178' , port=3306 , user='root' , password='SunLand2@' ,
-                                  db=db_name ,
+                                  db='sscp_test' ,
                                   charset='utf8mb4' , cursorclass=pymysql.cursors.DictCursor)
     # 通过cursor创建游标
     cursor = connection.cursor ()
-    cursor.execute (sql)
+    cursor.execute (search_sql)
     result = cursor.fetchall ()
 
     search_results = []
@@ -24,8 +24,16 @@ def conn ( db_name , search_sql ):
     return search_results
 
 
-def QA_test ( url , db_name , robot_id , search_q_sql ):
-    questions = conn (db_name , search_q_sql)
+def get_all_question ():
+    sql = "select question from ai_question"
+    result = conn (sql)
+    return result
+
+
+def QA_test ():
+    url = 'http://10.75.2.121:9200/api/qa'
+
+    questions = get_all_question ()
     headers = {'Content-Type': 'application/json' , 'Accept': 'application/json'}
     Q_list = questions
     A_list = []
@@ -34,7 +42,7 @@ def QA_test ( url , db_name , robot_id , search_q_sql ):
     for Q in questions:
         s = json.dumps ({
             "question": Q ,
-            "aiRobotId": robot_id ,
+            "aiRobotId": 175 ,
         })
         qa_question_req = requests.post (url , data=s , headers=headers)
         qa_question_text = json.loads (qa_question_req.text)
@@ -44,7 +52,7 @@ def QA_test ( url , db_name , robot_id , search_q_sql ):
                 A = qa_question_data['answer']
                 search_equal_a_sql = "select  question from ai_question as a left join ai_answer as b on a.question_id = b.question_id  where answer = '%s'" % (
                     A)
-                equal_a_question = conn (db_name , search_equal_a_sql)
+                equal_a_question = conn (search_equal_a_sql)
                 qa_dict['question'] = Q
                 qa_dict['answer'] = A
                 if Q in equal_a_question:
@@ -58,6 +66,8 @@ def QA_test ( url , db_name , robot_id , search_q_sql ):
                 QAR_list.append (qa_dict)
         except TypeError as e:
             print ('get_robot_answers =' , str (e))
+            A = '无答案'
+
     print ('Q_list=' , Q_list)
     print ('A_list=' , A_list)
     print ('R_list=' , R_list)
@@ -66,8 +76,5 @@ def QA_test ( url , db_name , robot_id , search_q_sql ):
 
 
 if __name__ == '__main__':
-    db_name = 'sscp_test'
-    sql = "select question from ai_question"
-    a_url = 'http://10.75.2.121:9200/api/qa'
-    robot_id = 175
-    QA_test (a_url , db_name , robot_id , sql)
+    QA = QA_test ()
+    print ('QA=' , QA)

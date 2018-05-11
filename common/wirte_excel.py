@@ -35,18 +35,7 @@ def write_data ( file_name , sheet_name ):
     question_list = []
     response_lsit = []
     result_lsit = []
-    # 创建数据空表
-    data_list_names = []
-    for index in range (1 , len (title_name)):
-        list_name = title_name[index] + '_list'
-        data_list_names.append (list_name)
-    print ('data_list_names=' , data_list_names)
-
-    # 把写入数据放进list
-    write_data_lists = []
-    for l in range (len (data_list_names)):
-        data_list_names[l] = []
-        write_data_lists.append (data_list_names[l])
+    data = QA_test(url,db_name,robot_id,search_q_sql)
 
     # 编写表头
     # sheet.write(col,row,str)

@@ -1,7 +1,7 @@
 import requests
 import json
 from base.config import *
-from common.reqeusts_headers import *
+from base.reqeusts_headers import *
 
 
 def add_knowledge ():

@@ -1,4 +1,4 @@
-from common.reqeusts_headers import *
+from base.reqeusts_headers import *
 from base import config
 
 
